@@ -8,10 +8,16 @@
 </style>
 <html ng-app="mapApp">
 <body ng-controller="mapController">
+<input type="text" ng-model="local.start" integer>
+<input type="text" ng-model="local.end" integer>
 <google-map center="map.center" zoom="map.zoom">
-  <markers models="markers" coords="'self'" click="'onClick'" labelContent="'title'">
+  <markers models="markers" coords="'self'" click="'onClick'" labelContent="'title'" icon="'icon'" >
     <windows show="'showWindow'" closeClick="'close'">
       <div>
+          <div ng-controller="infoController">
+            <button ng-click="onStartClick()">Start Here</button>
+            <button ng-click="onEndClick()">End Here</button><br />
+          </div>
         This is a window for id {{ id }}.
       </div>
     </windows>
