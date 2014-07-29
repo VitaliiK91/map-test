@@ -8,15 +8,15 @@
 </style>
 <html ng-app="mapApp">
 <body ng-controller="mapController">
-<input type="text" ng-model="local.start" integer>
-<input type="text" ng-model="local.end" integer>
-<google-map center="map.center" zoom="map.zoom">
-  <markers models="markers" coords="'self'" click="'onClick'" labelContent="'title'" icon="'icon'" >
+Starts:<select ng-model="local.start" ng-options-mouseover="logIt()" ng-options="marker.id as marker.longitude for marker in local.markers"></select>  <br />
+Ends:  <select ng-model="local.end" ng-options="marker.id as marker.longitude for marker in local.markers"> </select> 
+<google-map center="map.center" zoom="map.zoom" draggable="true">
+  <markers models="local.markers" coords="'self'" click="'onClick'" labelContent="'title'" icon="'icon'" >
     <windows show="'showWindow'" closeClick="'close'">
       <div>
           <div ng-controller="infoController">
-            <button ng-click="onStartClick()">Start Here</button>
-            <button ng-click="onEndClick()">End Here</button><br />
+             <button ng-click="onStartClick()">Start Here</button>
+             <button ng-click="onEndClick()">End Here</button>
           </div>
         This is a window for id {{ id }}.
       </div>
