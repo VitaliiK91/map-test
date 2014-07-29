@@ -1,0 +1,20 @@
+<script src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/lodash/dist/lodash.underscore.js"></script>
+<script src="bower_components/angular-google-maps/dist/angular-google-maps.js"></script>
+<script src="map.js"></script>
+<style>
+  .angular-google-map-container { height: 920px; }
+</style>
+<html ng-app="mapApp">
+<body ng-controller="mapController">
+<google-map center="map.center" zoom="map.zoom">
+  <markers models="markers" coords="'self'" click="'onClick'" labelContent="'title'">
+    <windows show="'showWindow'" closeClick="'close'">
+      <div>
+        This is a window for id {{ id }}.
+      </div>
+    </windows>
+  </markers>
+</google-map>
+</html>
