@@ -1,31 +1,33 @@
 app = angular.module 'mapApp', ['google-maps']
 
-app.controller 'infoController', ['$scope', ($scope) ->
-  $scope.init = (id) ->
-    $scope.id = $scope.$parent.id
-    console.log $scope.$parent.id
+app.service 'sharedProperties', ->
+  props = {
+    start: 0,
+    end: 0
+  }
+  return {
+    Properties: -> return props,
+    setStart: (val) -> props.start = val,
+    setEnd: (val) -> props.end = val
+  }
 
+app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedProperties) ->
   $scope.onStartClick = () ->
-    console.log "Start at " + $scope.model.id
-    $scope.local.start = $scope.model.id
+    sharedProperties.setStart($scope.model.id)
     $scope.model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png"
   $scope.onEndClick = () ->
-    console.log "Ends at " + $scope.model.id
-    console.log $scope.map
-    $scope.$parent.local.end = $scope.model.id
-    console.log $scope
+    sharedProperties.setEnd($scope.model.id)
     $scope.model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png"
 ]
 
-app.controller 'mapController', ['$scope', ($scope) ->
+app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedProperties) ->
   $scope.markers = []
   $scope.map = {
     'center': {'latitude': 33.884388, 'longitude': -117.641235},
     'zoom': 12 
   }
-  $scope.local = {}
-  $scope.local.start = 0
-  $scope.local.end = 0
+
+  $scope.local = sharedProperties.Properties()
 
   latlngs = []
 
