@@ -8,7 +8,9 @@
 </style>
 <html ng-app="mapApp">
 <body ng-controller="mapController">
-Starts:<select ng-model="local.start" ng-options-mouseover="logIt()" ng-options="marker.id as marker.longitude for marker in local.markers"></select>  <br />
+Starts:<select ng-model="local.start" ng-mouseover="logIt($event)">
+ <option ng-repeat="marker in local.markers" value="{{marker.id}}">{{marker.longitude}}</option>
+</select>  <br />
 Ends:  <select ng-model="local.end" ng-options="marker.id as marker.longitude for marker in local.markers"> </select> 
 <google-map center="map.center" zoom="map.zoom" draggable="true">
   <markers models="local.markers" coords="'self'" click="'onClick'" labelContent="'title'" icon="'icon'" >

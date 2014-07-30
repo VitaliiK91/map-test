@@ -38,7 +38,8 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
 
   $scope.local = sharedProperties.Properties()
 
-  $scope.logIt = -> console.log "Selected"
+  $scope.logIt = (e) -> 
+    console.log e.target
 
   latlngs = []
 

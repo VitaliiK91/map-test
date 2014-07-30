@@ -62,8 +62,8 @@
         'zoom': 12
       };
       $scope.local = sharedProperties.Properties();
-      $scope.logIt = function() {
-        return console.log("Selected");
+      $scope.logIt = function(e) {
+        return console.log(e.target);
       };
       latlngs = [];
       latlngs.push({
