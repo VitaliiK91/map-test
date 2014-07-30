@@ -33,19 +33,7 @@
         return sharedProperties.setStart($scope.model.id);
       };
       return $scope.onEndClick = function() {
-        var marker, markers, _i, _len;
-        sharedProperties.setEnd($scope.model.id);
-        markers = sharedProperties.Properties().markers;
-        for (_i = 0, _len = markers.length; _i < _len; _i++) {
-          marker = markers[_i];
-          if (marker.status === "end") {
-            marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png";
-            marker.status = "inactive";
-          }
-        }
-        sharedProperties.setMarkers = markers;
-        $scope.model.status = "end";
-        return $scope.model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png";
+        return sharedProperties.setEnd($scope.model.id);
       };
     }
   ]);
@@ -65,6 +53,7 @@
       $scope.logIt = function() {
         return console.log("Selected");
       };
+      $scope.prevIcon = '';
       latlngs = [];
       latlngs.push({
         'latitude': 33.884780,
@@ -90,11 +79,14 @@
         marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png";
         marker.showWindow = false;
         marker.close = function() {
+          this.model.icon = $scope.prevIcon;
           this.model.showWindow = false;
           return $scope.$apply();
         };
         marker.onClick = function() {
           var markerr, _j, _len1, _ref;
+          $scope.prevIcon = this.model.icon;
+          this.model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-facd1b/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/tollstation.png";
           _ref = $scope.local.markers;
           for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
             markerr = _ref[_j];
@@ -122,11 +114,11 @@
         }
         sharedProperties.setMarkers = markers;
         $scope.local.markers[$scope.local.start].status = "start";
-        return $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png";
+        return $scope.prevIcon = $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png";
       });
       return $scope.$watch('local.end', function() {
         var markers, _j, _len1;
-        if ($scope.local.start === -1) {
+        if ($scope.local.end === -1) {
           return;
         }
         console.log("End changed");
@@ -140,7 +132,7 @@
         }
         sharedProperties.setMarkers = markers;
         $scope.local.markers[$scope.local.end].status = "end";
-        return $scope.local.markers[$scope.local.end].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png";
+        return $scope.prevIcon = $scope.local.markers[$scope.local.end].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png";
       });
     }
   ]);

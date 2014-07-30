@@ -19,14 +19,6 @@ app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedP
     
   $scope.onEndClick = () ->
     sharedProperties.setEnd($scope.model.id)
-    markers = sharedProperties.Properties().markers
-    for marker in markers
-      if marker.status == "end"
-        marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
-        marker.status = "inactive"
-    sharedProperties.setMarkers = markers
-    $scope.model.status = "end"
-    $scope.model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png"
 ]
 
 app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedProperties) ->
@@ -39,6 +31,8 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
   $scope.local = sharedProperties.Properties()
 
   $scope.logIt = -> console.log "Selected"
+
+  $scope.prevIcon = ''
 
   latlngs = []
 
@@ -56,10 +50,13 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
     marker.status = 'inactive'
     marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
     marker.showWindow = false
-    marker.close = ->
+    marker.close = -> 
+      @model.icon = $scope.prevIcon
       @model.showWindow = false
       $scope.$apply()
     marker.onClick = ->
+      $scope.prevIcon = @model.icon
+      @model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-facd1b/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/tollstation.png"
       for markerr in $scope.local.markers
         markerr.showWindow = false
       @model.showWindow = true
@@ -79,10 +76,10 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
         marker.status = "inactive"
     sharedProperties.setMarkers = markers
     $scope.local.markers[$scope.local.start].status = "start"
-    $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png"
+    $scope.prevIcon = $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png"
    
    $scope.$watch 'local.end', ->
-    if $scope.local.start is -1
+    if $scope.local.end is -1
       return
     console.log "End changed"
     markers = sharedProperties.Properties().markers
@@ -92,5 +89,5 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
         marker.status = "inactive"
     sharedProperties.setMarkers = markers
     $scope.local.markers[$scope.local.end].status = "end"
-    $scope.local.markers[$scope.local.end].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png"
+    $scope.prevIcon = $scope.local.markers[$scope.local.end].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png"
 ]
