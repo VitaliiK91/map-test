@@ -54,6 +54,10 @@
         return console.log("Selected");
       };
       $scope.prevIcon = '';
+      $scope.showTraffic = false;
+      $scope.toggleTrafficLayer = function() {
+        return $scope.showTraffic = !$scope.showTraffic;
+      };
       latlngs = [];
       latlngs.push({
         'latitude': 33.884780,

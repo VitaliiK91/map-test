@@ -10,7 +10,9 @@
 <body ng-controller="mapController">
 Starts:<select ng-model="local.start" ng-options-mouseover="logIt()" ng-options="marker.id as marker.longitude for marker in local.markers"></select>  <br />
 Ends:  <select ng-model="local.end" ng-options="marker.id as marker.longitude for marker in local.markers"> </select> 
+<button ng-click="toggleTrafficLayer()">Traffic</button>
 <google-map center="map.center" zoom="map.zoom" draggable="true">
+  <layer type="TrafficLayer"  show="showTraffic"></layer>
   <markers models="local.markers" coords="'self'" click="'onClick'" labelContent="'title'" icon="'icon'" >
     <windows show="'showWindow'" closeClick="'close'">
       <div>

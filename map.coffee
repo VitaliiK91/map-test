@@ -34,6 +34,11 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
 
   $scope.prevIcon = ''
 
+  $scope.showTraffic = false
+
+  $scope.toggleTrafficLayer =  ->
+    $scope.showTraffic = !$scope.showTraffic
+
   latlngs = []
 
   latlngs.push {'latitude': 33.884780, 'longitude': -117.639754}
