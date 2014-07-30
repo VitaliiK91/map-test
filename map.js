@@ -9,7 +9,8 @@
     props = {
       start: -1,
       end: -1,
-      markers: []
+      markers: [],
+      panorama: {}
     };
     return {
       Properties: function() {
@@ -23,6 +24,9 @@
       },
       setMarkers: function(val) {
         return props.markers = val;
+      },
+      setPanorama: function(val) {
+        return props.panorama = val;
       }
     };
   });
@@ -32,8 +36,19 @@
       $scope.onStartClick = function() {
         return sharedProperties.setStart($scope.model.id);
       };
-      return $scope.onEndClick = function() {
+      $scope.onEndClick = function() {
         return sharedProperties.setEnd($scope.model.id);
+      };
+      return $scope.onStreetViewClick = function() {
+        var gMap, lat, long, map, panorama;
+        map = sharedProperties.Properties().panorama;
+        gMap = map.getGMap();
+        panorama = gMap.getStreetView();
+        lat = sharedProperties.Properties().markers[$scope.model.id].latitude;
+        long = sharedProperties.Properties().markers[$scope.model.id].longitude;
+        panorama.setPosition(new google.maps.LatLng(lat, long));
+        panorama.setVisible(true);
+        return sharedProperties.setPanorama(map);
       };
     }
   ]);
@@ -47,8 +62,16 @@
           'latitude': 33.884388,
           'longitude': -117.641235
         },
-        'zoom': 12
+        'zoom': 12,
+        'events': {
+          tilesloaded: function(map) {
+            return $scope.$apply(function() {
+              return $scope.mapInstance = map;
+            });
+          }
+        }
       };
+      $scope.streetView = {};
       $scope.local = sharedProperties.Properties();
       $scope.logIt = function() {
         return console.log("Selected");
@@ -60,8 +83,8 @@
       };
       latlngs = [];
       latlngs.push({
-        'latitude': 33.884780,
-        'longitude': -117.639754
+        'latitude': 33.884472,
+        'longitude': -117.637241
       });
       latlngs.push({
         'latitude': 33.884388,
@@ -89,6 +112,7 @@
         };
         marker.onClick = function() {
           var markerr, _j, _len1, _ref;
+          sharedProperties.setPanorama($scope.streetView);
           $scope.prevIcon = this.model.icon;
           this.model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-facd1b/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/tollstation.png";
           _ref = $scope.local.markers;

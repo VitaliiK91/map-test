@@ -4,13 +4,15 @@ app.service 'sharedProperties', ->
   props = {
     start: -1,
     end: -1,
-    markers: []
+    markers: [],
+    panorama: {}
   }
   return {
     Properties: -> return props,
     setStart: (val) -> props.start = val,
     setEnd: (val) -> props.end = val,
-    setMarkers: (val) -> props.markers = val
+    setMarkers: (val) -> props.markers = val,
+    setPanorama: (val) -> props.panorama = val
   }
 
 app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedProperties) ->
@@ -19,17 +21,35 @@ app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedP
     
   $scope.onEndClick = () ->
     sharedProperties.setEnd($scope.model.id)
+    
+  $scope.onStreetViewClick = ->
+    map = sharedProperties.Properties().panorama
+    gMap = map.getGMap()
+    panorama = gMap.getStreetView()
+    lat = sharedProperties.Properties().markers[$scope.model.id].latitude 
+    long = sharedProperties.Properties().markers[$scope.model.id].longitude #get coords of current exit
+    panorama.setPosition( new google.maps.LatLng(lat, long) ) #set streetView
+    panorama.setVisible(true) 
+    sharedProperties.setPanorama(map)
 ]
 
 app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedProperties) ->
   $scope.markers = []
   $scope.map = {
     'center': {'latitude': 33.884388, 'longitude': -117.641235},
-    'zoom': 12 
+    'zoom': 12 ,
+    'events': {
+            tilesloaded: (map) ->
+                $scope.$apply( ->
+                    $scope.mapInstance = map
+                )
+            }
   }
 
+  $scope.streetView = {} # map instance
+  
   $scope.local = sharedProperties.Properties()
-
+  
   $scope.logIt = -> console.log "Selected"
 
   $scope.prevIcon = ''
@@ -41,7 +61,7 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
 
   latlngs = []
 
-  latlngs.push {'latitude': 33.884780, 'longitude': -117.639754}
+  latlngs.push {'latitude': 33.884472, 'longitude': -117.637241}
   latlngs.push {'latitude': 33.884388, 'longitude': -117.641235}
   latlngs.push {'latitude': 33.883924, 'longitude': -117.643724}
 
@@ -60,6 +80,7 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
       @model.showWindow = false
       $scope.$apply()
     marker.onClick = ->
+      sharedProperties.setPanorama $scope.streetView #set map instance to sharedProperties
       $scope.prevIcon = @model.icon
       @model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-facd1b/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/tollstation.png"
       for markerr in $scope.local.markers
