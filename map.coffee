@@ -3,8 +3,16 @@ app = angular.module 'mapApp', ['google-maps', 'services']
 # InfoWindow controller
 app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedProperties) ->
   
-  $scope.onStartClick = () -> sharedProperties.setStart($scope.model.id) 
-  $scope.onEndClick = () -> sharedProperties.setEnd($scope.model.id)
+  $scope.onStartClick = () -> 
+    props = sharedProperties.Properties()
+    id = $scope.model.id
+    sharedProperties.setEnd -1 if props.route.end is id
+    sharedProperties.setStart($scope.model.id) 
+  $scope.onEndClick = () -> 
+    props = sharedProperties.Properties()
+    id = $scope.model.id
+    sharedProperties.setStart -1 if props.route.start is id
+    sharedProperties.setEnd($scope.model.id) 
 
   $scope.onStreetViewClick = ->
     properties = sharedProperties.Properties()
@@ -58,11 +66,14 @@ app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService',
     $scope.map.local.markers.push marker
   
   $scope.$watchCollection 'map.local.route', (newValues, oldValues, scope) ->
+    console.log newValues
+    console.log oldValues
     startId = newValues.start
     endId = newValues.end
     # Check is needed just in case the current start is trying to be overwritten by end
     if (startId is -1) and (endId is -1) or (startId is endId)
-      return
+      return sharedProperties.setStart -1 if oldValues.start is startId
+      return sharedProperties.setEnd -1 if oldValues.end is endId
     markers = sharedProperties.Properties().markers
     # Set other markers that were previously start or end to inactive
     markers.forEach (marker) ->

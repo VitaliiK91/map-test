@@ -25,9 +25,21 @@ app = angular.module('mapApp', ['google-maps', 'services']);
 app.controller('infoController', [
   '$scope', 'sharedProperties', function($scope, sharedProperties) {
     $scope.onStartClick = function() {
+      var id, props;
+      props = sharedProperties.Properties();
+      id = $scope.model.id;
+      if (props.route.end === id) {
+        sharedProperties.setEnd(-1);
+      }
       return sharedProperties.setStart($scope.model.id);
     };
     $scope.onEndClick = function() {
+      var id, props;
+      props = sharedProperties.Properties();
+      id = $scope.model.id;
+      if (props.route.start === id) {
+        sharedProperties.setStart(-1);
+      }
       return sharedProperties.setEnd($scope.model.id);
     };
     return $scope.onStreetViewClick = function() {
@@ -94,10 +106,17 @@ app.controller('mapController', [
     });
     return $scope.$watchCollection('map.local.route', function(newValues, oldValues, scope) {
       var endId, markers, startId;
+      console.log(newValues);
+      console.log(oldValues);
       startId = newValues.start;
       endId = newValues.end;
       if ((startId === -1) && (endId === -1) || (startId === endId)) {
-        return;
+        if (oldValues.start === startId) {
+          return sharedProperties.setStart(-1);
+        }
+        if (oldValues.end === endId) {
+          return sharedProperties.setEnd(-1);
+        }
       }
       markers = sharedProperties.Properties().markers;
       markers.forEach(function(marker) {
