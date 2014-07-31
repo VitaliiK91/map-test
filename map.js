@@ -31,7 +31,6 @@ app.controller('infoController', [
       var currentId, gMap, lat, lng, map, panorama, properties;
       currentId = $scope.model.id;
       properties = sharedProperties.Properties();
-      console.log(properties);
       map = properties.panorama;
       gMap = map.getGMap();
       panorama = gMap.getStreetView();
@@ -109,7 +108,6 @@ app.controller('mapController', [
       marker.onClick = function() {
         this.model.status = "focused";
         sharedProperties.setPanorama($scope.streetView);
-        console.log($scope.streetView);
         $scope.local.markers.forEach(function(element) {
           element.showWindow = false;
           return element.icon = element.prevIcon;

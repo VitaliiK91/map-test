@@ -10,7 +10,6 @@ app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedP
   $scope.onStreetViewClick = ->
     currentId = $scope.model.id
     properties = sharedProperties.Properties()
-    console.log properties
     map = properties.panorama
     gMap = map.getGMap()
     panorama = gMap.getStreetView()
@@ -30,7 +29,7 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
   }
 
   $scope.streetView = {}
-
+  
   $scope.local = sharedProperties.Properties()
 
   $scope.showTraffic = false
@@ -76,7 +75,6 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
     marker.onClick = ->
       @model.status = "focused"
       sharedProperties.setPanorama $scope.streetView
-      console.log $scope.streetView
       $scope.local.markers.forEach (element) -> 
         element.showWindow = false
         element.icon = element.prevIcon
