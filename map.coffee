@@ -1,17 +1,11 @@
-app = angular.module 'mapApp', ['google-maps']
+class Marker
+  constructor: (@id, @latitude, @longitude) ->
+    @start = null
+    @end = null
+    @icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
+    @showWindow = false
 
-app.service 'sharedProperties', ->
-  props = {
-    start: -1,
-    end: -1,
-    markers: []
-  }
-  return {
-    Properties: -> return props,
-    setStart: (val) -> props.start = val,
-    setEnd: (val) -> props.end = val,
-    setMarkers: (val) -> props.markers = val
-  }
+app = angular.module 'mapApp', ['google-maps', 'services']
 
 app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedProperties) ->
   $scope.onStartClick = () ->
@@ -23,6 +17,7 @@ app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedP
 
 app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedProperties) ->
   $scope.markers = []
+  
   $scope.map = {
     'center': {'latitude': 33.884388, 'longitude': -117.641235},
     'zoom': 12 
@@ -39,60 +34,54 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
   $scope.toggleTrafficLayer =  ->
     $scope.showTraffic = !$scope.showTraffic
 
+  setMarkerToStart = (marker) ->
+    marker.status = "start"
+    marker.icon = $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png"
+    marker.prevIcon = $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png"
+  
+  setMakerToInactive = (marker) ->
+    marker.status = "inactive"
+    marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
+    marker.prevIcon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
+
+  setMarkerToEnd = (marker) ->
+    marker.status = "end"
+    marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png"
+    marker.prevIcon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png"
+	
   latlngs = []
 
   latlngs.push {'latitude': 33.884780, 'longitude': -117.639754}
   latlngs.push {'latitude': 33.884388, 'longitude': -117.641235}
   latlngs.push {'latitude': 33.883924, 'longitude': -117.643724}
-
-  for latlng, i in latlngs
-    marker = {}
-    marker.start = null
-    marker.end = null
-    marker.latitude = latlng.latitude
-    marker.longitude = latlng.longitude
-    marker.id = i
-    marker.status = 'inactive'
-    marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
-    marker.showWindow = false
+  
+  latlngs.forEach (element, index) ->
+    marker = new Marker index, element.latitude, element.longitude 
+	
     marker.close = -> 
       @model.icon = $scope.prevIcon
       @model.showWindow = false
       $scope.$apply()
+	  
     marker.onClick = ->
       $scope.prevIcon = @model.icon
       @model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-facd1b/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/tollstation.png"
-      for markerr in $scope.local.markers
-        markerr.showWindow = false
+      $scope.local.markers.forEach (element) -> element.showWindow = false
       @model.showWindow = true
       $scope.id = @model.id
       $scope.$apply()
-    # $scope.markers.push marker
+	  
     $scope.local.markers.push marker
   
-  $scope.$watch 'local.start', ->
-    if $scope.local.start is -1
+  $scope.$watchGroup ['local.start', 'local.end'], (newValues, oldValues) ->
+    startId = newValues[0].id 
+    endId = newValues[1].id
+    if (startId is -1) and (endId is -1)
       return
-    console.log "Start changed."
     markers = sharedProperties.Properties().markers
-    for marker in markers
-      if marker.status == "start"
-        marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
-        marker.status = "inactive"
-    sharedProperties.setMarkers = markers
-    $scope.local.markers[$scope.local.start].status = "start"
-    $scope.prevIcon = $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png"
-   
-   $scope.$watch 'local.end', ->
-    if $scope.local.end is -1
-      return
-    console.log "End changed"
-    markers = sharedProperties.Properties().markers
-    for marker in markers
-      if marker.status == "end"
-        marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png"
-        marker.status = "inactive"
-    sharedProperties.setMarkers = markers
-    $scope.local.markers[$scope.local.end].status = "end"
-    $scope.prevIcon = $scope.local.markers[$scope.local.end].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png"
+    markers.forEach (marker) ->
+      setMakerToInactive(marker) if marker.status is "start" or marker.status is "end"
+    sharedProperties.setMarkers markers
+    setMakerToStart markers[startId]
+    setMarkerToEnd markers[endId]    
 ]
