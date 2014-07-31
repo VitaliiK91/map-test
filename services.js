@@ -6,22 +6,28 @@ app = angular.module('services', []);
 app.service('sharedProperties', function() {
   var props;
   props = {
-    start: -1,
-    end: -1,
-    markers: []
+    route: {
+      start: -1,
+      end: -1
+    },
+    markers: [],
+    panorama: {}
   };
   return {
     Properties: function() {
       return props;
     },
     setStart: function(val) {
-      return props.start = val;
+      return props.route.start = val;
     },
     setEnd: function(val) {
-      return props.end = val;
+      return props.route.end = val;
     },
     setMarkers: function(val) {
       return props.markers = val;
+    },
+    setPanorama: function(val) {
+      return props.panorama = val;
     }
   };
 });

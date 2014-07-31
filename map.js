@@ -8,7 +8,8 @@ Marker = (function() {
     this.longitude = longitude;
     this.start = null;
     this.end = null;
-    this.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png";
+    this.icon = "/states/inactive.png";
+    this.prevIcon = "/states/inactive.png";
     this.showWindow = false;
   }
 
@@ -23,15 +24,29 @@ app.controller('infoController', [
     $scope.onStartClick = function() {
       return sharedProperties.setStart($scope.model.id);
     };
-    return $scope.onEndClick = function() {
+    $scope.onEndClick = function() {
       return sharedProperties.setEnd($scope.model.id);
+    };
+    return $scope.onStreetViewClick = function() {
+      var currentId, gMap, lat, lng, map, panorama, properties;
+      currentId = $scope.model.id;
+      properties = sharedProperties.Properties();
+      console.log(properties);
+      map = properties.panorama;
+      gMap = map.getGMap();
+      panorama = gMap.getStreetView();
+      lat = properties.markers[currentId].latitude;
+      lng = properties.markers[currentId].longitude;
+      panorama.setPosition(new google.maps.LatLng(lat, lng));
+      panorama.setVisible(true);
+      return sharedProperties.setPanorama(map);
     };
   }
 ]);
 
 app.controller('mapController', [
   '$scope', 'sharedProperties', function($scope, sharedProperties) {
-    var latlngs, setMakerToInactive, setMarkerToEnd, setMarkerToStart;
+    var latlngs, setMarkerToEnd, setMarkerToInactive, setMarkerToStart;
     $scope.markers = [];
     $scope.map = {
       'center': {
@@ -40,78 +55,90 @@ app.controller('mapController', [
       },
       'zoom': 12
     };
+    $scope.streetView = {};
     $scope.local = sharedProperties.Properties();
-    $scope.logIt = function() {
-      return console.log("Selected");
-    };
-    $scope.prevIcon = '';
     $scope.showTraffic = false;
     $scope.toggleTrafficLayer = function() {
       return $scope.showTraffic = !$scope.showTraffic;
     };
     setMarkerToStart = function(marker) {
+      if (marker == null) {
+        return;
+      }
       marker.status = "start";
-      marker.icon = $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png";
-      return marker.prevIcon = $scope.local.markers[$scope.local.start].icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-white/shadow-1/border-color/symbolstyle-color/symbolshadowstyle-no/gradient-no/bridge_old.png";
+      marker.icon = "/states/startpoint.png";
+      return marker.prevIcon = "/states/startpoint.png";
     };
-    setMakerToInactive = function(marker) {
+    setMarkerToInactive = function(marker) {
+      if (marker == null) {
+        return;
+      }
       marker.status = "inactive";
-      marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png";
-      return marker.prevIcon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-66c547/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/bridge_old.png";
+      marker.icon = "/states/inactive.png";
+      return marker.prevIcon = "/states/inactive.png";
     };
     setMarkerToEnd = function(marker) {
+      if (marker == null) {
+        return;
+      }
       marker.status = "end";
-      marker.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png";
-      return marker.prevIcon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-262626/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/bridge_old.png";
+      marker.icon = "/states/endpoint.png";
+      return marker.prevIcon = "/states/endpoint.png";
     };
     latlngs = [];
     latlngs.push({
-      'latitude': 33.884780,
-      'longitude': -117.639754
+      'latitude': 33.843801,
+      'longitude': -117.717234
     });
     latlngs.push({
-      'latitude': 33.884388,
-      'longitude': -117.641235
+      'latitude': 33.826690,
+      'longitude': -117.716419
     });
     latlngs.push({
-      'latitude': 33.883924,
-      'longitude': -117.643724
+      'latitude': 33.820415,
+      'longitude': -117.716977
     });
     latlngs.forEach(function(element, index) {
       var marker;
       marker = new Marker(index, element.latitude, element.longitude);
       marker.close = function() {
-        this.model.icon = $scope.prevIcon;
+        this.model.icon = marker.prevIcon;
         this.model.showWindow = false;
         return $scope.$apply();
       };
       marker.onClick = function() {
-        $scope.prevIcon = this.model.icon;
-        this.model.icon = "http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-facd1b/shapecolor-light/shadow-1/border-white/symbolstyle-dark/symbolshadowstyle-no/gradient-no/tollstation.png";
+        this.model.status = "focused";
+        sharedProperties.setPanorama($scope.streetView);
+        console.log($scope.streetView);
         $scope.local.markers.forEach(function(element) {
-          return element.showWindow = false;
+          element.showWindow = false;
+          return element.icon = element.prevIcon;
         });
+        this.model.icon = "/states/focused.png";
         this.model.showWindow = true;
         $scope.id = this.model.id;
         return $scope.$apply();
       };
       return $scope.local.markers.push(marker);
     });
-    return $scope.$watchGroup(['local.start', 'local.end'], function(newValues, oldValues) {
+    return $scope.$watchCollection('local.route', function(newValues, oldValues, scope) {
       var endId, markers, startId;
-      startId = newValues[0].id;
-      endId = newValues[1].id;
-      if ((startId === -1) && (endId === -1)) {
+      if (newValues == null) {
+        return;
+      }
+      startId = newValues.start;
+      endId = newValues.end;
+      if ((startId === -1) && (endId === -1) || (startId === endId)) {
         return;
       }
       markers = sharedProperties.Properties().markers;
       markers.forEach(function(marker) {
         if (marker.status === "start" || marker.status === "end") {
-          return setMakerToInactive(marker);
+          return setMarkerToInactive(marker);
         }
       });
       sharedProperties.setMarkers(markers);
-      setMakerToStart(markers[startId]);
+      setMarkerToStart(markers[startId]);
       return setMarkerToEnd(markers[endId]);
     });
   }

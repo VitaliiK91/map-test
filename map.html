@@ -9,10 +9,10 @@
 </style>
 <html ng-app="mapApp">
 <body ng-controller="mapController">
-Starts:<select ng-model="local.start" ng-options-mouseover="logIt()" ng-options="marker.id as marker.longitude for marker in local.markers"></select>  <br />
-Ends:  <select ng-model="local.end" ng-options="marker.id as marker.longitude for marker in local.markers"> </select> 
+Starts:<select ng-model="local.route.start" ng-options-mouseover="logIt()" ng-options="marker.id as marker.longitude for marker in local.markers"></select>  <br />
+Ends:  <select ng-model="local.route.end" ng-options="marker.id as marker.longitude for marker in local.markers"> </select> 
 <button ng-click="toggleTrafficLayer()">Traffic</button>
-<google-map center="map.center" zoom="map.zoom" draggable="true">
+<google-map control="streetView" center="map.center" zoom="map.zoom" draggable="true">
   <layer type="TrafficLayer"  show="showTraffic"></layer>
   <markers models="local.markers" coords="'self'" click="'onClick'" labelContent="'title'" icon="'icon'" >
     <windows show="'showWindow'" closeClick="'close'">
@@ -20,6 +20,7 @@ Ends:  <select ng-model="local.end" ng-options="marker.id as marker.longitude fo
           <div ng-controller="infoController">
              <button ng-click="onStartClick()">Start Here</button>
              <button ng-click="onEndClick()">End Here</button>
+             <button ng-click="onStreetViewClick()">Street View</button>
           </div>
         This is a window for id {{ id }}.
       </div>
