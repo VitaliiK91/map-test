@@ -17,7 +17,7 @@ Ends: <select ng-model="map.local.route.end"
 <google-map control="map.streetView" center="map.center" zoom="map.zoom" draggable="true">
   <layer type="TrafficLayer"  show="map.showTraffic"></layer>
   <markers models="map.local.markers" coords="'latlng'" click="'onClick'" labelContent="'title'" icon="'icon'" >
-    <windows show="'showWindow'" closeClick="'close'">
+    <windows show="'showWindow'" closeClick="'close'" options="map.infoWindowOptions">
       <div>
           <div ng-controller="infoController">
              <button ng-click="onStartClick()">Start Here</button>

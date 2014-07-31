@@ -56,6 +56,9 @@ app.controller('mapController', [
       'showTraffic': false,
       'toggleTrafficLayer': function() {
         return $scope.map.showTraffic = !$scope.map.showTraffic;
+      },
+      'infoWindowOptions': {
+        'pixelOffset': new google.maps.Size(0, -30)
       }
     };
     latlngs = [];

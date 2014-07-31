@@ -27,7 +27,10 @@ app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService',
     'streetView': {},
     'local': sharedProperties.Properties(),
     'showTraffic': false,
-    'toggleTrafficLayer': -> $scope.map.showTraffic = !$scope.map.showTraffic
+    'toggleTrafficLayer': -> $scope.map.showTraffic = !$scope.map.showTraffic,
+    'infoWindowOptions': {
+      'pixelOffset': new google.maps.Size(0, -30)
+    }
   }
     
   latlngs = []
