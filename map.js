@@ -56,7 +56,7 @@ app.controller('infoController', [
       }, 100).animate({
         'z-index': 1
       }, 1).animate({
-        'height': '100%'
+        'height': 500
       }, 800);
       return true;
     };

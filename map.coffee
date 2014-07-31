@@ -22,7 +22,7 @@ app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedP
       }
     panorama = new google.maps.StreetViewPanorama(document.getElementById('pano'),panoramaOptions)
     panorama.setVisible(true)
-    $('#pano').animate({'height': 0}, 100).animate({'z-index': 1}, 1).animate({'height': '100%'}, 800)
+    $('#pano').animate({'height': 0}, 100).animate({'z-index': 1}, 1).animate({'height': 500}, 800)
     return true
 ]
 
