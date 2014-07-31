@@ -9,12 +9,14 @@
 </style>
 <html ng-app="mapApp">
 <body ng-controller="mapController">
-Starts:<select ng-model="local.route.start" ng-options-mouseover="logIt()" ng-options="marker.id as marker.longitude for marker in local.markers"></select>  <br />
-Ends:  <select ng-model="local.route.end" ng-options="marker.id as marker.longitude for marker in local.markers"> </select> 
-<button ng-click="toggleTrafficLayer()">Traffic</button>
-<google-map control="streetView" center="map.center" zoom="map.zoom" draggable="true">
-  <layer type="TrafficLayer"  show="showTraffic"></layer>
-  <markers models="local.markers" coords="'self'" click="'onClick'" labelContent="'title'" icon="'icon'" >
+Starts: <select ng-model="map.local.route.start" 
+          ng-options="marker.id as marker.id for marker in map.local.markers"></select><br />
+Ends: <select ng-model="map.local.route.end" 
+        ng-options="marker.id as marker.id for marker in map.local.markers"> </select> 
+<button ng-click="map.toggleTrafficLayer()">Traffic</button>
+<google-map control="map.streetView" center="map.center" zoom="map.zoom" draggable="true">
+  <layer type="TrafficLayer"  show="map.showTraffic"></layer>
+  <markers models="map.local.markers" coords="'latlng'" click="'onClick'" labelContent="'title'" icon="'icon'" >
     <windows show="'showWindow'" closeClick="'close'">
       <div>
           <div ng-controller="infoController">

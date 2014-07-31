@@ -1,5 +1,6 @@
 app = angular.module 'mapApp', ['google-maps', 'services']
 
+# InfoWindow controller
 app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedProperties) ->
   
   $scope.onStartClick = () -> sharedProperties.setStart($scope.model.id) 
@@ -9,9 +10,11 @@ app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedP
     properties = sharedProperties.Properties()
     currentMarker = properties.markers[$scope.model.id]
     streetMap = properties.panorama
-    streetMap.setPosition new google.maps.LatLng currentMarker.latitude, currentMarker.longitude
+    streetMap.setPosition currentMarker.glatlng  #glatlng contains google latlng literal
     streetMap.setVisible true
 ]
+
+# Map Controller
 
 app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService', 
  ($scope, sharedProperties, markerService) ->
@@ -21,15 +24,11 @@ app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService',
   $scope.map = {
     'center': {'latitude': 33.884388, 'longitude': -117.641235},
     'zoom': 12,
+    'streetView': {},
+    'local': sharedProperties.Properties(),
+    'showTraffic': false,
+    'toggleTrafficLayer': -> $scope.map.showTraffic = !$scope.map.showTraffic
   }
-
-  $scope.streetView = {}
-  
-  $scope.local = sharedProperties.Properties()
-
-  $scope.showTraffic = false
-
-  $scope.toggleTrafficLayer =  -> $scope.showTraffic = !$scope.showTraffic	
     
   latlngs = []
 
@@ -37,30 +36,32 @@ app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService',
   latlngs.push {'latitude': 33.826690, 'longitude': -117.716419}
   latlngs.push {'latitude': 33.820415, 'longitude': -117.716977}
   
+  # Creating the markers
   latlngs.forEach (element, index) ->
-    marker = new Marker index, element.latitude, element.longitude 
-	
+    marker = new Marker index, element
     marker.close = ->
       markerService.setMarkerDefault @model
       $scope.$apply()
 	  
     marker.onClick = ->
-      sharedProperties.setPanorama $scope.streetView
-      $scope.local.markers.forEach (element) -> markerService.setMarkerDefault element
+      # Saving the streetview map
+      sharedProperties.setPanorama $scope.map.streetView
+      # Set all markers to their default just in case one that was focused wasn't closed
+      $scope.map.local.markers.forEach (element) -> markerService.setMarkerDefault element
       markerService.setMarkerStatus @model, "focused"
       $scope.id = @model.id
       $scope.$apply()
 	  
-    $scope.local.markers.push marker
+    $scope.map.local.markers.push marker
   
-  $scope.$watchCollection 'local.route', (newValues, oldValues, scope) ->
+  $scope.$watchCollection 'map.local.route', (newValues, oldValues, scope) ->
     startId = newValues.start
     endId = newValues.end
     # Check is needed just in case the current start is trying to be overwritten by end
     if (startId is -1) and (endId is -1) or (startId is endId)
       return
     markers = sharedProperties.Properties().markers
-    
+    # Set other markers that were previously start or end to inactive
     markers.forEach (marker) ->
       if marker.status is "start" or marker.status is "end"
         markerService.setMarkerStatus marker, "inactive" 

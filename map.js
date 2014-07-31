@@ -2,12 +2,15 @@
 var Marker, app;
 
 Marker = (function() {
-  function Marker(id, latitude, longitude) {
+  function Marker(id, latlng) {
     this.id = id;
-    this.latitude = latitude;
-    this.longitude = longitude;
+    this.latlng = latlng;
     this.start = null;
     this.end = null;
+    this.glatlng = {
+      lat: this.latlng.latitude,
+      lng: this.latlng.longitude
+    };
     this.icon = "/states/inactive.png";
     this.prevIcon = "/states/inactive.png";
     this.showWindow = false;
@@ -32,7 +35,7 @@ app.controller('infoController', [
       properties = sharedProperties.Properties();
       currentMarker = properties.markers[$scope.model.id];
       streetMap = properties.panorama;
-      streetMap.setPosition(new google.maps.LatLng(currentMarker.latitude, currentMarker.longitude));
+      streetMap.setPosition(currentMarker.glatlng);
       return streetMap.setVisible(true);
     };
   }
@@ -47,13 +50,13 @@ app.controller('mapController', [
         'latitude': 33.884388,
         'longitude': -117.641235
       },
-      'zoom': 12
-    };
-    $scope.streetView = {};
-    $scope.local = sharedProperties.Properties();
-    $scope.showTraffic = false;
-    $scope.toggleTrafficLayer = function() {
-      return $scope.showTraffic = !$scope.showTraffic;
+      'zoom': 12,
+      'streetView': {},
+      'local': sharedProperties.Properties(),
+      'showTraffic': false,
+      'toggleTrafficLayer': function() {
+        return $scope.map.showTraffic = !$scope.map.showTraffic;
+      }
     };
     latlngs = [];
     latlngs.push({
@@ -70,23 +73,23 @@ app.controller('mapController', [
     });
     latlngs.forEach(function(element, index) {
       var marker;
-      marker = new Marker(index, element.latitude, element.longitude);
+      marker = new Marker(index, element);
       marker.close = function() {
         markerService.setMarkerDefault(this.model);
         return $scope.$apply();
       };
       marker.onClick = function() {
-        sharedProperties.setPanorama($scope.streetView);
-        $scope.local.markers.forEach(function(element) {
+        sharedProperties.setPanorama($scope.map.streetView);
+        $scope.map.local.markers.forEach(function(element) {
           return markerService.setMarkerDefault(element);
         });
         markerService.setMarkerStatus(this.model, "focused");
         $scope.id = this.model.id;
         return $scope.$apply();
       };
-      return $scope.local.markers.push(marker);
+      return $scope.map.local.markers.push(marker);
     });
-    return $scope.$watchCollection('local.route', function(newValues, oldValues, scope) {
+    return $scope.$watchCollection('map.local.route', function(newValues, oldValues, scope) {
       var endId, markers, startId;
       startId = newValues.start;
       endId = newValues.end;
