@@ -28,24 +28,19 @@ app.controller('infoController', [
       return sharedProperties.setEnd($scope.model.id);
     };
     return $scope.onStreetViewClick = function() {
-      var currentId, gMap, lat, lng, map, panorama, properties;
-      currentId = $scope.model.id;
+      var currentMarker, properties, streetMap;
       properties = sharedProperties.Properties();
-      map = properties.panorama;
-      gMap = map.getGMap();
-      panorama = gMap.getStreetView();
-      lat = properties.markers[currentId].latitude;
-      lng = properties.markers[currentId].longitude;
-      panorama.setPosition(new google.maps.LatLng(lat, lng));
-      panorama.setVisible(true);
-      return sharedProperties.setPanorama(map);
+      currentMarker = properties.markers[$scope.model.id];
+      streetMap = properties.panorama;
+      streetMap.setPosition(new google.maps.LatLng(currentMarker.latitude, currentMarker.longitude));
+      return streetMap.setVisible(true);
     };
   }
 ]);
 
 app.controller('mapController', [
-  '$scope', 'sharedProperties', function($scope, sharedProperties) {
-    var latlngs, setMarkerToEnd, setMarkerToInactive, setMarkerToStart;
+  '$scope', 'sharedProperties', 'markerService', function($scope, sharedProperties, markerService) {
+    var latlngs;
     $scope.markers = [];
     $scope.map = {
       'center': {
@@ -59,30 +54,6 @@ app.controller('mapController', [
     $scope.showTraffic = false;
     $scope.toggleTrafficLayer = function() {
       return $scope.showTraffic = !$scope.showTraffic;
-    };
-    setMarkerToStart = function(marker) {
-      if (marker == null) {
-        return;
-      }
-      marker.status = "start";
-      marker.icon = "/states/startpoint.png";
-      return marker.prevIcon = "/states/startpoint.png";
-    };
-    setMarkerToInactive = function(marker) {
-      if (marker == null) {
-        return;
-      }
-      marker.status = "inactive";
-      marker.icon = "/states/inactive.png";
-      return marker.prevIcon = "/states/inactive.png";
-    };
-    setMarkerToEnd = function(marker) {
-      if (marker == null) {
-        return;
-      }
-      marker.status = "end";
-      marker.icon = "/states/endpoint.png";
-      return marker.prevIcon = "/states/endpoint.png";
     };
     latlngs = [];
     latlngs.push({
@@ -101,19 +72,15 @@ app.controller('mapController', [
       var marker;
       marker = new Marker(index, element.latitude, element.longitude);
       marker.close = function() {
-        this.model.icon = marker.prevIcon;
-        this.model.showWindow = false;
+        markerService.setMarkerDefault(this.model);
         return $scope.$apply();
       };
       marker.onClick = function() {
-        this.model.status = "focused";
         sharedProperties.setPanorama($scope.streetView);
         $scope.local.markers.forEach(function(element) {
-          element.showWindow = false;
-          return element.icon = element.prevIcon;
+          return markerService.setMarkerDefault(element);
         });
-        this.model.icon = "/states/focused.png";
-        this.model.showWindow = true;
+        markerService.setMarkerStatus(this.model, "focused");
         $scope.id = this.model.id;
         return $scope.$apply();
       };
@@ -121,9 +88,6 @@ app.controller('mapController', [
     });
     return $scope.$watchCollection('local.route', function(newValues, oldValues, scope) {
       var endId, markers, startId;
-      if (newValues == null) {
-        return;
-      }
       startId = newValues.start;
       endId = newValues.end;
       if ((startId === -1) && (endId === -1) || (startId === endId)) {
@@ -132,12 +96,12 @@ app.controller('mapController', [
       markers = sharedProperties.Properties().markers;
       markers.forEach(function(marker) {
         if (marker.status === "start" || marker.status === "end") {
-          return setMarkerToInactive(marker);
+          return markerService.setMarkerStatus(marker, "inactive");
         }
       });
       sharedProperties.setMarkers(markers);
-      setMarkerToStart(markers[startId]);
-      return setMarkerToEnd(markers[endId]);
+      markerService.setMarkerStatus(markers[startId], 'start');
+      return markerService.setMarkerStatus(markers[endId], 'end');
     });
   }
 ]);

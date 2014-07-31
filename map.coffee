@@ -1,26 +1,21 @@
 app = angular.module 'mapApp', ['google-maps', 'services']
 
 app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedProperties) ->
-  $scope.onStartClick = () ->
-    sharedProperties.setStart($scope.model.id)
-    
-  $scope.onEndClick = () ->
-    sharedProperties.setEnd($scope.model.id)
+  
+  $scope.onStartClick = () -> sharedProperties.setStart($scope.model.id) 
+  $scope.onEndClick = () -> sharedProperties.setEnd($scope.model.id)
 
   $scope.onStreetViewClick = ->
-    currentId = $scope.model.id
     properties = sharedProperties.Properties()
-    map = properties.panorama
-    gMap = map.getGMap()
-    panorama = gMap.getStreetView()
-    lat = properties.markers[currentId].latitude 
-    lng = properties.markers[currentId].longitude
-    panorama.setPosition new google.maps.LatLng lat, lng
-    panorama.setVisible true
-    sharedProperties.setPanorama map
+    currentMarker = properties.markers[$scope.model.id]
+    streetMap = properties.panorama
+    streetMap.setPosition new google.maps.LatLng currentMarker.latitude, currentMarker.longitude
+    streetMap.setVisible true
 ]
 
-app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedProperties) ->
+app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService', 
+ ($scope, sharedProperties, markerService) ->
+  
   $scope.markers = []
   
   $scope.map = {
@@ -34,30 +29,8 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
 
   $scope.showTraffic = false
 
-  $scope.toggleTrafficLayer =  ->
-    $scope.showTraffic = !$scope.showTraffic
-
-  setMarkerToStart = (marker) ->
-    if not marker? 
-      return
-    marker.status = "start"
-    marker.icon = "/states/startpoint.png"
-    marker.prevIcon = "/states/startpoint.png"
-  
-  setMarkerToInactive = (marker) ->
-    if not marker? 
-      return
-    marker.status = "inactive"
-    marker.icon = "/states/inactive.png"
-    marker.prevIcon = "/states/inactive.png"
-
-  setMarkerToEnd = (marker) ->
-    if not marker? 
-      return
-    marker.status = "end"
-    marker.icon = "/states/endpoint.png"
-    marker.prevIcon = "/states/endpoint.png"
-	
+  $scope.toggleTrafficLayer =  -> $scope.showTraffic = !$scope.showTraffic	
+    
   latlngs = []
 
   latlngs.push {'latitude': 33.843801, 'longitude': -117.717234}
@@ -67,35 +40,31 @@ app.controller 'mapController', ['$scope', 'sharedProperties',($scope, sharedPro
   latlngs.forEach (element, index) ->
     marker = new Marker index, element.latitude, element.longitude 
 	
-    marker.close = -> 
-      @model.icon = marker.prevIcon
-      @model.showWindow = false
+    marker.close = ->
+      markerService.setMarkerDefault @model
       $scope.$apply()
 	  
     marker.onClick = ->
-      @model.status = "focused"
       sharedProperties.setPanorama $scope.streetView
-      $scope.local.markers.forEach (element) -> 
-        element.showWindow = false
-        element.icon = element.prevIcon
-      @model.icon = "/states/focused.png"
-      @model.showWindow = true
+      $scope.local.markers.forEach (element) -> markerService.setMarkerDefault element
+      markerService.setMarkerStatus @model, "focused"
       $scope.id = @model.id
       $scope.$apply()
 	  
     $scope.local.markers.push marker
   
   $scope.$watchCollection 'local.route', (newValues, oldValues, scope) ->
-    if not newValues? 
-      return
     startId = newValues.start
     endId = newValues.end
+    # Check is needed just in case the current start is trying to be overwritten by end
     if (startId is -1) and (endId is -1) or (startId is endId)
       return
     markers = sharedProperties.Properties().markers
+    
     markers.forEach (marker) ->
-      setMarkerToInactive(marker) if marker.status is "start" or marker.status is "end"
+      if marker.status is "start" or marker.status is "end"
+        markerService.setMarkerStatus marker, "inactive" 
+    
     sharedProperties.setMarkers markers
-    setMarkerToStart markers[startId]
-    setMarkerToEnd markers[endId]    
+    markerService.setMarkerStatus markers[startId], 'start'; markerService.setMarkerStatus markers[endId], 'end'
 ]

@@ -27,7 +27,30 @@ app.service('sharedProperties', function() {
       return props.markers = val;
     },
     setPanorama: function(val) {
-      return props.panorama = val;
+      return props.panorama = val.getGMap().getStreetView();
+    }
+  };
+});
+
+app.service('markerService', function() {
+  return {
+    setMarkerStatus: function(marker, status) {
+      if (marker == null) {
+
+      } else {
+        marker.status = status;
+        if (status === 'focused') {
+          marker.showWindow = true;
+        }
+        if (status !== 'focused') {
+          marker.prevIcon = "/states/" + status + ".png";
+        }
+        return marker.icon = "/states/" + status + ".png";
+      }
+    },
+    setMarkerDefault: function(marker) {
+      marker.showWindow = false;
+      return marker.icon = marker.prevIcon;
     }
   };
 });
