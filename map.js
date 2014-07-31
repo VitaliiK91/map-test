@@ -43,12 +43,22 @@ app.controller('infoController', [
       return sharedProperties.setEnd($scope.model.id);
     };
     return $scope.onStreetViewClick = function() {
-      var currentMarker, properties, streetMap;
+      var currentMarker, panorama, panoramaOptions, properties;
       properties = sharedProperties.Properties();
       currentMarker = properties.markers[$scope.model.id];
-      streetMap = properties.panorama;
-      streetMap.setPosition(currentMarker.glatlng);
-      return streetMap.setVisible(true);
+      panoramaOptions = {
+        position: currentMarker.glatlng
+      };
+      panorama = new google.maps.StreetViewPanorama(document.getElementById('pano'), panoramaOptions);
+      panorama.setVisible(true);
+      $('#pano').animate({
+        'height': 0
+      }, 100).animate({
+        'z-index': 1
+      }, 1).animate({
+        'height': '100%'
+      }, 800);
+      return true;
     };
   }
 ]);
@@ -68,6 +78,14 @@ app.controller('mapController', [
       'showTraffic': false,
       'toggleTrafficLayer': function() {
         return $scope.map.showTraffic = !$scope.map.showTraffic;
+      },
+      'mapOptions': {
+        'panControl': false,
+        'rotateControl': false,
+        'streetViewControl': false,
+        'zoomControlOptions': {
+          'position': google.maps.ControlPosition.BOTTOM_LEFT
+        }
       },
       'infoWindowOptions': {
         'pixelOffset': new google.maps.Size(0, -30)
@@ -106,8 +124,6 @@ app.controller('mapController', [
     });
     return $scope.$watchCollection('map.local.route', function(newValues, oldValues, scope) {
       var endId, markers, startId;
-      console.log(newValues);
-      console.log(oldValues);
       startId = newValues.start;
       endId = newValues.end;
       if ((startId === -1) && (endId === -1) || (startId === endId)) {

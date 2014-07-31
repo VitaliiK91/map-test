@@ -17,9 +17,13 @@ app.controller 'infoController', ['$scope', 'sharedProperties', ($scope, sharedP
   $scope.onStreetViewClick = ->
     properties = sharedProperties.Properties()
     currentMarker = properties.markers[$scope.model.id]
-    streetMap = properties.panorama
-    streetMap.setPosition currentMarker.glatlng  #glatlng contains google latlng literal
-    streetMap.setVisible true
+    panoramaOptions = {
+        position : currentMarker.glatlng
+      }
+    panorama = new google.maps.StreetViewPanorama(document.getElementById('pano'),panoramaOptions)
+    panorama.setVisible(true)
+    $('#pano').animate({'height': 0}, 100).animate({'z-index': 1}, 1).animate({'height': '100%'}, 800)
+    return true
 ]
 
 # Map Controller
@@ -36,9 +40,18 @@ app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService',
     'local': sharedProperties.Properties(),
     'showTraffic': false,
     'toggleTrafficLayer': -> $scope.map.showTraffic = !$scope.map.showTraffic,
+    'mapOptions': {
+      'panControl': false,
+      'rotateControl': false,
+      'streetViewControl': false,
+      'zoomControlOptions': {
+        'position': google.maps.ControlPosition.BOTTOM_LEFT
+      }
+    }
     'infoWindowOptions': {
       'pixelOffset': new google.maps.Size(0, -30)
     }
+
   }
     
   latlngs = []
@@ -66,8 +79,6 @@ app.controller 'mapController', ['$scope', 'sharedProperties', 'markerService',
     $scope.map.local.markers.push marker
   
   $scope.$watchCollection 'map.local.route', (newValues, oldValues, scope) ->
-    console.log newValues
-    console.log oldValues
     startId = newValues.start
     endId = newValues.end
     # Check is needed just in case the current start is trying to be overwritten by end

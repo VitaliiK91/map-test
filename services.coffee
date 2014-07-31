@@ -1,7 +1,6 @@
 app = angular.module 'services', []
 
 # Services used by controllers
-
 app.service 'sharedProperties', ->
   props = {
     route: { start: -1, end: -1 },
