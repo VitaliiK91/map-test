@@ -5,7 +5,7 @@
             "json()": {},
             "@inited": "true"
         },
-        "@runner": "Apache httpd (PHP, HTML)"
+        "@runner": "CoffeeScript"
     },
     "share": {
         "@preview": false,

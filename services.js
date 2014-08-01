@@ -43,9 +43,9 @@ app.service('markerService', function() {
           marker.showWindow = true;
         }
         if (status !== 'focused') {
-          marker.prevIcon = "/states/" + status + ".png";
+          marker.prevIcon = "/vitaliikalinincrg/map-test//states/" + status + ".png";
         }
-        return marker.icon = "/states/" + status + ".png";
+        return marker.icon = "/vitaliikalinincrg/map-test//states/" + status + ".png";
       }
     },
     setMarkerDefault: function(marker) {

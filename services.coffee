@@ -24,8 +24,8 @@ app.service 'markerService', ->
       else
         marker.status = status
         marker.showWindow = true if status is 'focused'
-        marker.prevIcon = "/states/#{status}.png" if status isnt 'focused'
-        marker.icon = "/states/#{status}.png"
+        marker.prevIcon = "/vitaliikalinincrg/map-test//states/#{status}.png" if status isnt 'focused'
+        marker.icon = "/vitaliikalinincrg/map-test//states/#{status}.png"
     ,
     setMarkerDefault: (marker) ->
       marker.showWindow = false
